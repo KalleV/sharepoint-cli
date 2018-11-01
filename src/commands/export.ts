@@ -8,7 +8,9 @@ export default class Export extends Command {
   static description = 'Exports all items from a SharePoint list into a CSV file'
 
   static examples = [
-    "$ sharepoint-cli export -l 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov -o list-items.csv",
+    "$ sharepoint-cli export -l 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov -o list-items.csv" +
+    ' --top 200',
+    'Outputs a CSV containing the item properties from the first 200 entries from the "Bio Samples" list'
   ]
 
   static flags = {
@@ -30,21 +32,31 @@ export default class Export extends Command {
       char: 'l',
       description: 'SharePoint list name to export',
       required: true
+    }),
+    top: flags.string({
+      char: 't',
+      description: 'Max number of items to get from the list. It corresponds to the SharePoint REST API "top" query' +
+      ' parameter.',
+      default: '100'
     })
   }
 
-  static args = [
-  ]
+  static args = []
 
   async run() {
     const {flags} = this.parse(Export)
+    const username = await cli.prompt('What is your Windows login name?')
+    const password = await cli.prompt('What is your password?', {type: 'hide'})
 
     // Initialize authentication strategy or reuse cached credentials when they exist.
-    let spr = sprequest.create()
+    let spr = sprequest.create({
+      username,
+      password
+    })
 
     cli.action.start('Requesting SharePoint list data...')
 
-    const {body: {d: {results}}} = await spr.get(`${flags.site}/${flags.subsite}/_api/web/lists/GetByTitle('${flags.list}')/items`)
+    const {body: {d: {results}}} = await spr.get(`${flags.site}/${flags.subsite}/_api/web/lists/GetByTitle('${flags.list}')/items?$top=${flags.top}`)
 
     // Remove hidden fields
     const filtered = results.map((item: any) => {

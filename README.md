@@ -43,11 +43,20 @@ OPTIONS
   -h, --help           show CLI help
   -l, --list=list      (required) SharePoint list name to export
   -o, --output=output  (required) Path to output file
+
+  -t, --top=top        [default: 100] Max number of items to get from the list. It corresponds to the SharePoint REST
+                       API "top" query parameter.
+
+  --delimiter=tab|csv  [default: csv] The delimiter to use for the output file items.
+
   --site=site          [default: https://myrtb.nih.gov] SharePoint root site
+
   --subsite=subsite    [default: microarray] SharePoint subsite to access
 
-EXAMPLE
-  $ sharepoint-cli export -l 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov -o list-items.csv
+EXAMPLES
+  $ sharepoint-cli export --list 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov --output list-items.csv 
+  --top 200
+  Outputs a CSV containing the item properties from the first 200 entries from the "Bio Samples" list
 ```
 
 _See code: [src/commands/export.ts](https://github.com/KalleV/sharepoint-cli/blob/v0.0.0/src/commands/export.ts)_

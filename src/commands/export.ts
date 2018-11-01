@@ -8,8 +8,8 @@ export default class Export extends Command {
   static description = 'Exports all items from a SharePoint list into a CSV file'
 
   static examples = [
-    "$ sharepoint-cli export -l 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov -o list-items.csv" +
-    ' --top 200',
+    "$ sharepoint-cli export --list 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov --output" +
+    ' list-items.csv --top 200',
     'Outputs a CSV containing the item properties from the first 200 entries from the "Bio Samples" list'
   ]
 
@@ -38,6 +38,11 @@ export default class Export extends Command {
       description: 'Max number of items to get from the list. It corresponds to the SharePoint REST API "top" query' +
       ' parameter.',
       default: '100'
+    }),
+    delimiter: flags.string({
+      options: ['tab', 'csv'],
+      description: 'The delimiter to use for the output file items.',
+      default: 'csv'
     })
   }
 
@@ -95,8 +100,15 @@ export default class Export extends Command {
     const parser = new Parser({})
     const csv = parser.parse(filtered)
 
-    fs.writeFileSync(flags.output, csv)
+    switch (flags.delimiter) {
+      case 'csv':
+        fs.writeFileSync(flags.output, csv)
+        break
+      case 'tab':
+        fs.writeFileSync(flags.output, csv.replace(/,/g, '\t'))
+        break
+    }
 
-    cli.action.start(`Wrote SharePoint List as CSV to file "${flags.output}"...`)
+    cli.action.start(`Wrote SharePoint list items to file "${flags.output}"...`)
   }
 }

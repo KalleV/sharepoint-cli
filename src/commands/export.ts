@@ -2,6 +2,7 @@ import {Command, flags} from '@oclif/command'
 import {cli} from 'cli-ux'
 import fs = require('fs')
 import {Parser} from 'json2csv'
+import jsonxml = require('jsontoxml')
 import sprequest = require('sp-request')
 
 export default class Export extends Command {
@@ -53,6 +54,11 @@ export default class Export extends Command {
       char: 'p',
       description: 'Password for the SharePoint site login.',
       env: 'PASSWORD'
+    }),
+    format: flags.string({
+      description: 'Output format',
+      options: ['csv', 'xml', 'json'],
+      default: 'csv'
     })
   }
 
@@ -61,12 +67,12 @@ export default class Export extends Command {
   async run() {
     const {flags} = this.parse(Export)
 
-    let username = flags.username as string;
+    let username = flags.username as string
     if (!username) {
       username = await cli.prompt('What is your login name?')
     }
 
-    let password = flags.password as string;
+    let password = flags.password as string
     if (!password) {
       password = await cli.prompt('What is your password?', {type: 'hide'})
     }
@@ -115,16 +121,29 @@ export default class Export extends Command {
       return item
     })
 
-    const parser = new Parser({})
-    const csv = parser.parse(filtered)
-
-    switch (flags.delimiter) {
+    // File output based on the selected option
+    switch (flags.format) {
       case 'csv':
-        fs.writeFileSync(flags.output, csv)
+        const parser = new Parser({})
+        const csv = parser.parse(filtered)
+
+        switch (flags.delimiter) {
+          case 'csv':
+            fs.writeFileSync(flags.output, csv)
+            break
+          case 'tab':
+            fs.writeFileSync(flags.output, csv.replace(/,/g, '\t'))
+        }
         break
-      case 'tab':
-        fs.writeFileSync(flags.output, csv.replace(/,/g, '\t'))
+      case 'json':
+        fs.writeFileSync(flags.output, JSON.stringify(filtered, null, 2))
         break
+      case 'xml':
+        const xml = jsonxml({
+          items: filtered
+        })
+        fs.writeFileSync(flags.output, xml)
+        break;
     }
 
     cli.action.start(`Wrote SharePoint list items to file "${flags.output}"...`)

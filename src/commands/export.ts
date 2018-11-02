@@ -43,6 +43,16 @@ export default class Export extends Command {
       options: ['tab', 'csv'],
       description: 'The delimiter to use for the output file items.',
       default: 'csv'
+    }),
+    username: flags.string({
+      char: 'u',
+      description: 'Login name for the SharePoint site.',
+      env: 'USER_NAME'
+    }),
+    password: flags.string({
+      char: 'p',
+      description: 'Password for the SharePoint site login.',
+      env: 'PASSWORD'
     })
   }
 
@@ -50,8 +60,16 @@ export default class Export extends Command {
 
   async run() {
     const {flags} = this.parse(Export)
-    const username = await cli.prompt('What is your Windows login name?')
-    const password = await cli.prompt('What is your password?', {type: 'hide'})
+
+    let username = flags.username as string;
+    if (!username) {
+      username = await cli.prompt('What is your login name?')
+    }
+
+    let password = flags.password as string;
+    if (!password) {
+      password = await cli.prompt('What is your password?', {type: 'hide'})
+    }
 
     // Initialize authentication strategy or reuse cached credentials when they exist.
     let spr = sprequest.create({

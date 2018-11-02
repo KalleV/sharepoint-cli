@@ -40,11 +40,6 @@ export default class Export extends Command {
       ' parameter.',
       default: '100'
     }),
-    delimiter: flags.string({
-      options: ['tab', 'csv'],
-      description: 'The delimiter to use for the output file items.',
-      default: 'csv'
-    }),
     username: flags.string({
       char: 'u',
       description: 'Login name for the SharePoint site.',
@@ -57,7 +52,7 @@ export default class Export extends Command {
     }),
     format: flags.string({
       description: 'Output format',
-      options: ['csv', 'xml', 'json'],
+      options: ['tsv', 'csv', 'xml', 'json'],
       default: 'csv'
     })
   }
@@ -121,19 +116,17 @@ export default class Export extends Command {
       return item
     })
 
+    const parser = new Parser({})
+
     // File output based on the selected option
     switch (flags.format) {
       case 'csv':
-        const parser = new Parser({})
         const csv = parser.parse(filtered)
-
-        switch (flags.delimiter) {
-          case 'csv':
-            fs.writeFileSync(flags.output, csv)
-            break
-          case 'tab':
-            fs.writeFileSync(flags.output, csv.replace(/,/g, '\t'))
-        }
+        fs.writeFileSync(flags.output, csv)
+        break
+      case 'tsv':
+        const tsv = parser.parse(filtered).replace(/,/g, '\t')
+        fs.writeFileSync(flags.output, tsv)
         break
       case 'json':
         fs.writeFileSync(flags.output, JSON.stringify(filtered, null, 2))

@@ -40,23 +40,21 @@ USAGE
   $ sharepoint-cli export
 
 OPTIONS
-  -h, --help               show CLI help
-  -l, --list=list          (required) SharePoint list name to export
-  -o, --output=output      (required) Path to output file
-  -p, --password=password  Password for the SharePoint site login.
+  -h, --help                 show CLI help
+  -l, --list=list            (required) SharePoint list name to export
+  -o, --output=output        (required) Path to output file
+  -p, --password=password    Password for the SharePoint site login.
 
-  -t, --top=top            [default: 100] Max number of items to get from the list. It corresponds to the SharePoint
-                           REST API "top" query parameter.
+  -t, --top=top              [default: 100] Max number of items to get from the list. It corresponds to the SharePoint
+                             REST API "top" query parameter.
 
-  -u, --username=username  Login name for the SharePoint site.
+  -u, --username=username    Login name for the SharePoint site.
 
-  --delimiter=tab|csv      [default: csv] The delimiter to use for the output file items.
+  --format=tsv|csv|xml|json  [default: csv] Output format
 
-  --format=csv|xml|json    [default: csv] Output format
+  --site=site                [default: https://myrtb.nih.gov] SharePoint root site
 
-  --site=site              [default: https://myrtb.nih.gov] SharePoint root site
-
-  --subsite=subsite        [default: microarray] SharePoint subsite to access
+  --subsite=subsite          [default: microarray] SharePoint subsite to access
 
 EXAMPLES
   $ sharepoint-cli export --list 'Bio Samples' --subsite microarray --site https://myrtb.nih.gov --output list-items.csv 
